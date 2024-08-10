@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发送邮件</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #e7f1ff; /* 浅蓝色背景 */
+        }
+        .container {
+            margin-top: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .email-input {
+            background-color: #f9f9f9;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">发送邮件</h1>
+        <form action="/send_email" method="post" enctype="multipart/form-data">
+            <label for="from_email">选择发送邮箱：</label>
+            <select name="from_email" id="from_email" class="form-control" required>
+                {% for account in accounts %}
+                    {% if account.status == '已通过' %}
+                        <option value="{{ account.email }}">{{ account.email }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <br>
+
+            <div class="form-group">
+                <input type="email" name="to_email" class="form-control" placeholder="收件人邮箱" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="subject" class="form-control" placeholder="邮件主题" required>
+            </div>
+            <div class="form-group">
+                <textarea name="html_content" rows="10" class="email-input" placeholder="邮件内容..." required></textarea>
+            </div>
+            <div class="form-group">
+                <input type="file" name="attachments" class="form-control-file" multiple>
+            </div>
+            <button type="submit" class="btn btn-primary">发送邮件</button>
+        </form>
+        <a href="/" class="btn btn-link">返回主页</a>
+    </div>
+</body>
+</html>

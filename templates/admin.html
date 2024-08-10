@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #e7f1ff; /* 浅蓝色背景 */
+        }
+        .container {
+            margin-top: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>注册请求管理</h1>
+
+        <!-- 搜索框 -->
+        <form class="form-inline mb-3" method="get">
+            <input type="text" name="search" class="form-control mr-2" placeholder="搜索邮箱..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-primary">搜索</button>
+            <a href="{{ url_for('admin') }}" class="btn btn-link ml-2">重置</a>
+        </form>
+
+        <!-- 批量操作表单 -->
+        <form method="post">
+            <input type="hidden" name="action" id="action">
+            <button type="button" class="btn btn-danger mb-2" onclick="setActionAndSubmit('delete')">批量删除</button>
+            <button type="button" class="btn btn-success mb-2" onclick="setActionAndSubmit('approve')">批量批准</button>
+            <button type="button" class="btn btn-warning mb-2" onclick="setActionAndSubmit('reject')">批量拒绝</button>
+
+            <!-- 注册请求列表 -->
+            <h2>注册请求列表</h2>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-md-1">
+                            <input type="checkbox" onclick="toggleSelectAll(this)">
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('admin', sort='email', order='asc' if sort_order == 'desc' else 'desc') }}">邮箱</a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="{{ url_for('admin', sort='status', order='asc' if sort_order == 'desc' else 'desc') }}">状态</a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ url_for('admin', sort='ip_address', order='asc' if sort_order == 'desc' else 'desc') }}">IP 地址</a>
+                        </div>
+                        <div class="col-md-2">操作</div>
+                    </div>
+                </li>
+                {% for account in accounts %}
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-1">
+                                <input type="checkbox" name="selected_ids" value="{{ account.id }}">
+                            </div>
+                            <div class="col-md-3">{{ account.email }}</div>
+                            <div class="col-md-2">{{ account.status }}</div>
+                            <div class="col-md-4">{{ account.ip_address }}</div>
+                            <div class="col-md-2">
+                                <form action="/approve/{{ account.id }}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-success btn-sm">批准</button>
+                                </form>
+                                <form action="/reject/{{ account.id }}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">拒绝</button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </form>
+
+        <form action="/admin_logout" method="POST">
+            <button type="submit" class="btn btn-danger mt-4">登出管理员</button>
+        </form>
+
+        <a href="/" class="btn btn-link mt-3">返回主页</a>
+    </div>
+
+    <script>
+        function setActionAndSubmit(action) {
+            document.getElementById('action').value = action;
+            document.forms[0].submit();
+        }
+
+        function toggleSelectAll(checkbox) {
+            var checkboxes = document.querySelectorAll('input[name="selected_ids"]');
+            checkboxes.forEach(function(cb) {
+                cb.checked = checkbox.checked;
+            });
+        }
+    </script>
+</body>
+</html>

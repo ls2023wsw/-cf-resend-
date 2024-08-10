@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮件发送记录</title>
+</head>
+<body>
+    <h1>邮件发送记录</h1>
+    <ul>
+        {% for record in records %}
+            <li>
+                <strong>发件人：</strong>{{ record.from_email }} <br>
+                <strong>收件人：</strong>{{ record.to_email }} <br>
+                <strong>主题：</strong>{{ record.subject }} <br>
+                <strong>内容：</strong>{{ record.html_content }} <br>
+                <form action="/delete_record/{{ record.id }}" method="post" style="display:inline;">
+                    <button type="submit">删除记录</button>
+                </form>
+            </li>
+            <hr>
+        {% endfor %}
+    </ul>
+    <a href="/">返回</a>
+</body>
+</html>

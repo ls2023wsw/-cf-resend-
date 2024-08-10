@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮件发送系统</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #e7f1ff; /* 浅蓝色背景 */
+        }
+        .container {
+            margin-top: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-control {
+            background-color: #f9f9f9;
+            border: 1px solid #007bff;
+        }
+        .form-control:focus {
+            border-color: #0056b3;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .email-input {
+            background-image: linear-gradient(white, white), url('https://i.imgur.com/8YxQzFj.png');
+            background-repeat: repeat;
+            background-size: auto 10px;
+            padding: 10px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">邮箱发送系统</h1>
+        <nav class="nav justify-content-center">
+            <a class="nav-link" href="/">主页</a>
+            {% if not logged_in %}
+                <a class="nav-link" href="/register_user">注册用户账号</a>
+            {% endif %}
+        </nav>
+
+        {% if not logged_in %}
+            <h2 class="mt-4">登录</h2>
+            <form action="/user_login" method="post">
+                <div class="form-group">
+                    <input type="text" name="username" class="form-control" placeholder="用户名" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" class="form-control" placeholder="密码" required>
+                </div>
+                <button type="submit" class="btn btn-primary">登录</button>
+            </form>
+        {% else %}
+            <h2 class="mt-4">欢迎，{{ session.user_id }}</h2>
+            <form action="/user_logout" method="POST">
+                <button type="submit" class="btn btn-danger">登出</button>
+            </form>
+
+            <h2 class="mt-4">已添加的邮箱账户</h2>
+            <ul class="list-group">
+                {% for account in accounts %}
+                    <li class="list-group-item">
+                        {% if account.status == '已通过' %}
+                            {{ account.email }}
+                        {% elif account.status == '申请中' %}
+                            {{ account.email }} (申请中)
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <a href="/register_email" class="btn btn-success mt-4">注册新邮箱账户</a>
+            <a href="/send_email" class="btn btn-info mt-4">发送邮件</a>
+            <a href="/records" class="btn btn-secondary mt-4">查看邮件记录</a>
+        {% endif %}
+
+        <!-- 显示闪现消息 -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-warning mt-3">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
