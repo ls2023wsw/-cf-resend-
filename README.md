@@ -43,6 +43,7 @@
    ```bash
    python app.py
    ```
+   也可以直接双击email.bat运行
 
 ## 反馈与支持
 
