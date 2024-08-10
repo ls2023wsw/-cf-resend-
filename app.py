@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 # 设置 Resend API 密钥
-resend.api_key = "re_RkYg577m_DtM5LYUZyWXqkcUUPLtGFc7f"
+resend.api_key = ""
 
 # 初始化 Flask 应用
 app = Flask(__name__)
@@ -51,8 +51,8 @@ with app.app_context():
     db.create_all()
 
 # 添加新的配置项，用于存储默认管理员的登录信息
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "luoshang"
+ADMIN_USERNAME = ""
+ADMIN_PASSWORD = ""
 
 # 管理员登录页面
 @app.route('/admin_login', methods=['GET', 'POST'])
@@ -205,7 +205,7 @@ def register_email():
     if request.method == 'POST':
         email_prefix = request.form.get('email_prefix')
         password = request.form.get('password')
-        email = f"{email_prefix}@wangxitan.work"
+        email = f"{email_prefix}@exp.com"
 
         # 检查邮箱账户是否已存在
         if EmailAccount.query.filter_by(email=email).first():
