@@ -21,6 +21,7 @@
    ```bash
    git clone https://github.com/ls2023wsw/-cf-resend-.git
    cd -cf-resend-
+   pip install -r requirements.txt
    ```
 
 2. **配置 API Key**  
