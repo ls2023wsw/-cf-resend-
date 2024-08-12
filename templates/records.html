@@ -4,10 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>邮件发送记录</title>
+    <style>
+        body {
+            background-color: #e0f7fa; /* 浅蓝色背景 */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #00796b; /* 深绿色标题 */
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: white; /* 白色方框 */
+            border: 1px solid #b2ebf2; /* 浅蓝色边框 */
+            border-radius: 5px; /* 圆角 */
+            padding: 15px;
+            margin: 10px 0;
+        }
+        strong {
+            color: #00796b; /* 深绿色文本 */
+        }
+        button {
+            background-color: #f44336; /* 红色按钮 */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #d32f2f; /* 深红色按钮悬停效果 */
+        }
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #00796b; /* 深绿色链接 */
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline; /* 链接悬停效果 */
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            border: 1px solid #00796b;
+            border-radius: 5px;
+            background-color: white;
+            color: #00796b;
+            cursor: pointer;
+        }
+        .pagination button:hover {
+            background-color: #00796b;
+            color: white;
+        }
+        .pagination span {
+            margin: 0 5px;
+            align-self: center;
+        }
+    </style>
 </head>
 <body>
     <h1>邮件发送记录</h1>
-    <ul>
+    
+    <div>
+        <input type="text" id="searchInput" placeholder="搜索内容或主题" oninput="filterRecords()">
+        <select id="recordsPerPage" onchange="updatePagination()">
+            <option value="5">每页 5 条</option>
+            <option value="10">每页 10 条</option>
+            <option value="20">每页 20 条</option>
+        </select>
+    </div>
+
+    <ul id="recordList">
         {% for record in records %}
             <li>
                 <strong>发件人：</strong>{{ record.from_email }} <br>
@@ -21,6 +100,102 @@
             <hr>
         {% endfor %}
     </ul>
+
+    <div class="pagination" id="paginationControls"></div>
+
     <a href="/">返回</a>
+
+    <script>
+        let currentPage = 1;
+        let recordsPerPage = 5; // 默认每页显示 5 条记录
+
+        // 从后端提取记录并转换为适合前端显示的格式
+        const records = [
+            {% for record in records %}
+                {
+                    id: {{ record.id }},
+                    from_email: "{{ record.from_email }}",
+                    to_email: "{{ record.to_email }}",
+                    subject: "{{ record.subject }}",
+                    html_content: "{{ record.html_content | escape }}", // 使用 escape 防止 HTML 注入
+                }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        function renderRecords() {
+            const recordList = document.getElementById('recordList');
+            recordList.innerHTML = ''; // 清空当前记录列表
+
+            const start = (currentPage - 1) * recordsPerPage;
+            const end = start + recordsPerPage;
+            const filteredRecords = filterRecords(true); // 获取过滤后的记录
+
+            // 渲染当前页的记录
+            const recordsToRender = filteredRecords.slice(start, end);
+            recordsToRender.forEach(record => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>发件人：</strong>${record.from_email} <br>
+                    <strong>收件人：</strong>${record.to_email} <br>
+                    <strong>主题：</strong>${record.subject} <br>
+                    <strong>内容：</strong>${record.html_content} <br>
+                    <form action="/delete_record/${record.id}" method="post" style="display:inline;">
+                        <button type="submit">删除记录</button>
+                    </form>
+                `;
+                recordList.appendChild(li);
+            });
+
+            updatePagination();
+        }
+
+        function filterRecords(returnFiltered = false) {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const filteredRecords = records.filter(record => {
+                return record.subject.toLowerCase().includes(searchInput) || 
+                       record.html_content.toLowerCase().includes(searchInput);
+            });
+
+            if (returnFiltered) {
+                return filteredRecords;
+            }
+
+            currentPage = 1; // Reset to first page when filtering
+            renderRecords();
+            return filteredRecords;
+        }
+
+        function updatePagination() {
+            const paginationControls = document.getElementById('paginationControls');
+            paginationControls.innerHTML = ''; // 清空分页控件
+
+            const filteredRecords = filterRecords(true);
+            const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                button.onclick = () => {
+                    currentPage = i;
+                    renderRecords();
+                };
+                paginationControls.appendChild(button);
+            }
+
+            // 显示当前页码
+            const span = document.createElement('span');
+            span.innerText = `当前页: ${currentPage} / ${totalPages}`;
+            paginationControls.appendChild(span);
+        }
+
+        // 监听每页记录数的变化
+        document.getElementById('recordsPerPage').addEventListener('change', function() {
+            recordsPerPage = parseInt(this.value);
+            renderRecords();
+        });
+
+        // 初始渲染
+        renderRecords();
+    </script>
 </body>
 </html>

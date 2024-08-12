@@ -40,6 +40,10 @@
             border: 1px solid #007bff;
             border-radius: 5px;
         }
+        .pagination {
+            margin-top: 20px;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -70,9 +74,16 @@
             </form>
 
             <h2 class="mt-4">已添加的邮箱账户</h2>
-            <ul class="list-group">
+            <div>
+                <select id="recordsPerPage" onchange="updatePagination()">
+                    <option value="5">每页 5 条</option>
+                    <option value="10">每页 10 条</option>
+                    <option value="20">每页 20 条</option>
+                </select>
+            </div>
+            <ul id="accountList" class="list-group">
                 {% for account in accounts %}
-                    <li class="list-group-item">
+                    <li class="list-group-item" data-status="{{ account.status }}">
                         {% if account.status == '已通过' %}
                             {{ account.email }}
                         {% elif account.status == '申请中' %}
@@ -81,6 +92,8 @@
                     </li>
                 {% endfor %}
             </ul>
+
+            <div class="pagination" id="paginationControls"></div>
 
             <a href="/register_email" class="btn btn-success mt-4">注册新邮箱账户</a>
             <a href="/send_email" class="btn btn-info mt-4">发送邮件</a>
@@ -98,6 +111,60 @@
             {% endif %}
         {% endwith %}
     </div>
+
+    <script>
+        let currentPage = 1;
+        let recordsPerPage = 5; // 默认每页显示 5 条记录
+
+        function renderAccounts() {
+            const accountList = document.getElementById('accountList');
+            const paginationControls = document.getElementById('paginationControls');
+            const accounts = Array.from(accountList.children); // 获取所有账户列表项
+
+            // 清空当前账户列表和分页控件
+            accountList.innerHTML = '';
+            paginationControls.innerHTML = '';
+
+            // 计算分页
+            const totalAccounts = accounts.length;
+            const totalPages = Math.ceil(totalAccounts / recordsPerPage);
+            const start = (currentPage - 1) * recordsPerPage;
+            const end = start + recordsPerPage;
+
+            // 渲染当前页的账户
+            const accountsToRender = accounts.slice(start, end);
+            accountsToRender.forEach(account => {
+                accountList.appendChild(account);
+            });
+
+            // 创建分页按钮
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                button.className = 'btn btn-outline-secondary mx-1';
+                button.onclick = () => {
+                    currentPage = i;
+                    renderAccounts();
+                };
+                paginationControls.appendChild(button);
+            }
+
+            // 显示当前页码
+            const span = document.createElement('span');
+            span.innerText = `当前页: ${currentPage} / ${totalPages}`;
+            paginationControls.appendChild(span);
+        }
+
+        function updatePagination() {
+            const recordsPerPageSelect = document.getElementById('recordsPerPage');
+            recordsPerPage = parseInt(recordsPerPageSelect.value);
+            currentPage = 1; // Reset to first page when changing records per page
+            renderAccounts();
+        }
+
+        // 初始渲染
+        renderAccounts();
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
